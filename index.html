@@ -1,0 +1,346 @@
+<html>
+ <head>
+  <title>learningCloud xAPI basic calls</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <style type="text/css">
+      body { padding:10px 30px; }
+      .button {
+		  
+		  border: none;
+		  color: white;
+		  padding: 15px 32px;
+		  text-align: center;
+		  text-decoration: none;
+		  display: inline-block;
+		  font-size: 16px;
+		  margin: 4px 2px;
+		  cursor: pointer;
+		  width: 500px;
+		}
+.button1 {width: 500px;background-color: #4CAF50; /* Green */}
+.button2 {width: 500px;background-color: #C42828; /* Red */}
+.button3 {width: 500px;background-color: #A9A7A7; /* Grey */}
+.button4 {width: 500px;background-color: #E18E22; /* Orange */}
+.button5 {width: 500px;background-color: #226EE1; /* Blue */}
+
+
+
+    </style>
+  <script src="tincan-min.js"></script>
+ </head>
+  <script>
+	// learningCliud xAPI basic calls by Jose Martin
+    // xAPI configuration is sent in the URL query string parameters
+    var urlParams = new URLSearchParams(window.location.search);
+
+    var endpoint = urlParams.get('endpoint');
+    var auth = urlParams.get('auth');
+
+    var actor = JSON.parse(urlParams.get('actor')); // this needs to be JSON decoded
+    var activity_id = urlParams.get('activity_id');
+    var registration = urlParams.get('registration');
+
+   // Configure the LRS
+      var conf = {
+         "endpoint" : endpoint,
+         "auth" : auth,
+      };
+      ADL.XAPIWrapper.changeConfig(conf);
+// SEND INITIALIZED
+	function send_initialized() {
+      var statement = {
+      actor: actor, // the actor data sent by learningCloud
+      object: {
+        id: activity_id, // the activity_id sent by learningCloud
+        objectType: "Activity"
+      },
+      context: {
+        registration: registration // the registration sent by learningCloud
+      },
+      verb: {
+        id: "http://adlnet.gov/expapi/verbs/initialized",
+        display: {
+          "en-US" : "initialized",
+          "es-ES" : "inicializó"
+        },
+      }
+    };
+	 // Dispatch the statement to the LRS
+        ADL.XAPIWrapper.sendStatement(statement);
+        alert("initialized sent!");
+        return false; // stops the page from refreshing
+      }
+// SEND COMPLETED
+      function send_completed() {
+      var statement = {
+      actor: actor, // the actor data sent by learningCloud
+      object: {
+        id: activity_id, // the activity_id sent by learningCloud
+        objectType: "Activity"
+      },
+      context: {
+        registration: registration // the registration sent by learningCloud
+      },
+      verb: {
+        id: "http://adlnet.gov/expapi/verbs/completed",
+        display: {
+         "en-US" : "completed",
+          "es-ES" : "completó"
+        },
+      },
+      // the data learningCloud is expecting to see for a completion trigger:
+      result: {
+        completion: true,
+		duration: "PT1H"
+      }
+    };
+	 // Dispatch the statement to the LRS
+        ADL.XAPIWrapper.sendStatement(statement);
+        alert("completed sent!");
+        return false; // stops the page from refreshing
+      }
+// SEND COMPLETED BUT FAILED
+      function send_completed_but_failed() {
+      var statement = {
+      actor: actor, // the actor data sent by learningCloud
+      object: {
+        id: activity_id, // the activity_id sent by learningCloud
+        objectType: "Activity"
+      },
+      context: {
+        registration: registration // the registration sent by learningCloud
+      },
+      verb: {
+        id: "http://adlnet.gov/expapi/verbs/completed",
+        display: {
+         "en-US" : "completed",
+          "es-ES" : "completó"
+        },
+      },
+      // the data learningCloud is expecting to see for a completion trigger:
+      result: {
+	  score: {
+            scaled: 0.2,
+            raw: 20
+        },
+        completion: true,
+		success: false
+      }
+    };
+	 // Dispatch the statement to the LRS
+        ADL.XAPIWrapper.sendStatement(statement);
+        alert("completed sent!");
+        return false; // stops the page from refreshing
+      }
+// SEND COMPLETED AND PASSED
+      function send_completed_and_passed() {
+      var statement = {
+      actor: actor, // the actor data sent by learningCloud
+      object: {
+        id: activity_id, // the activity_id sent by learningCloud
+        objectType: "Activity"
+      },
+      context: {
+        registration: registration // the registration sent by learningCloud
+      },
+      verb: {
+        id: "http://adlnet.gov/expapi/verbs/completed",
+        display: {
+         "en-US" : "completed",
+          "es-ES" : "completó"
+        },
+      },
+      // the data learningCloud is expecting to see for a completion trigger:
+      result: {
+	  score: {
+            scaled: 0.8,
+            raw: 80
+        },
+        completion: true,
+		success: true
+      }
+    };
+	 // Dispatch the statement to the LRS
+        ADL.XAPIWrapper.sendStatement(statement);
+        alert("completed sent!");
+        return false; // stops the page from refreshing
+      }
+	  
+// SEND FAILED  
+	  function send_failed(score, completion_status) {
+	  var score_raw=score;
+	  var score_scaled=score/100;
+      var statement = {
+      actor: actor, // the actor data sent by learningCloud
+      object: {
+        id: activity_id, // the activity_id sent by learningCloud
+        objectType: "Activity"
+      },
+      context: {
+        registration: registration // the registration sent by learningCloud
+      },
+      verb: {
+        id: "http://adlnet.gov/expapi/verbs/failed",
+        display: {
+          "en-US" : "failed",
+          "es-ES" : "suspendió"
+        },
+      },
+      // the data learningCloud is expecting to see for a completion trigger:
+      result: {
+		score: {
+           scaled: score_scaled,
+           raw: score
+        },
+		completion: completion_status,
+        success: false
+      }
+    };
+	 // Dispatch the statement to the LRS
+        ADL.XAPIWrapper.sendStatement(statement);
+        alert("Failed sent!");
+        return false; // stops the page from refreshing
+      }
+// SEND PASSED  
+	  function send_passed(score, completion_status) {
+	  var score_raw=score;
+	  var score_scaled=score/100;
+      var statement = {
+      actor: actor, // the actor data sent by learningCloud
+      object: {
+        id: activity_id, // the activity_id sent by learningCloud
+        objectType: "Activity"
+      },
+      context: {
+        registration: registration // the registration sent by learningCloud
+      },
+      verb: {
+        id: "http://adlnet.gov/expapi/verbs/passed",
+        display: {
+         "en-US" : "passed",
+          "es-ES" : "aprobó"
+        },
+      },
+      // the data learningCloud is expecting to see for a completion trigger:
+      result: {
+		score: {
+            scaled: score_scaled,
+            raw: score
+        },
+		completion: completion_status,
+        success: true,
+		duration: "PT1H"
+      }
+    };
+	 // Dispatch the statement to the LRS
+        ADL.XAPIWrapper.sendStatement(statement);
+        alert("Passed sent!");
+        return false; // stops the page from refreshing
+      }
+// SEND TWO PASSED  
+	  function send_twopassed() {
+      var statement = {
+      actor: actor, // the actor data sent by learningCloud
+      object: {
+        id: activity_id, // the activity_id sent by learningCloud
+        objectType: "Activity"
+      },
+      context: {
+        registration: registration // the registration sent by learningCloud
+      },
+      verb: {
+        id: "http://adlnet.gov/expapi/verbs/passed",
+        display: {
+         "en-US" : "initialized",
+          "es-ES" : "inicializó"
+        },
+      },
+      // the data learningCloud is expecting to see for a completion trigger:
+      result: {
+		score: {
+            scaled: 0.8,
+            raw: 80
+        },
+		completion: true,
+        success: true
+      }
+    };
+	 // Dispatch the statement to the LRS
+        ADL.XAPIWrapper.sendStatement(statement);
+		ADL.XAPIWrapper.sendStatement(statement);
+        alert("two Passed sent!");
+        return false; // stops the page from refreshing
+      }
+	  // SEND TERMINATED
+	function send_terminated() {
+      var statement = {
+      actor: actor, // the actor data sent by learningCloud
+      object: {
+        id: activity_id, // the activity_id sent by learningCloud
+        objectType: "Activity"
+      },
+      context: {
+        registration: registration // the registration sent by learningCloud
+      },
+      verb: {
+        id: "http://adlnet.gov/expapi/verbs/terminated",
+        display: {
+        "en-US" : "terminated",
+          "es-ES" : "terminó"
+        },
+      }
+    };
+	 // Dispatch the statement to the LRS
+        ADL.XAPIWrapper.sendStatement(statement);
+        alert("terminated sent!");
+        return false; // stops the page from refreshing
+      }
+	   // SEND STATE
+	function send_state() {
+      var state_id="cmi";
+	  var stateval = {"info":"the state info"};
+	 // Dispatch the statement to the LRS
+       ADL.XAPIWrapper.sendState(activity_id, actor,state_id, registration, stateval);
+        alert("state sent!");
+        return false; // stops the page from refreshing
+      }
+	   // GET STATE
+	function get_state() {
+      var state_id="cmi";
+	 // Dispatch the statement to the LRS
+       var myJsonObj=ADL.XAPIWrapper.getState(activity_id, actor, state_id, registration);
+        alert(JSON.stringify(myJsonObj, null, 4)); 
+        return false; // stops the page from refreshing
+      }
+  </script>
+  <body>
+  <h1>learningCloud xAPI basic calls</h1>
+  <button type="button" id="initialized-button" class="button button3" onclick="send_initialized()">Send initialized Statement</button>
+  <BR>
+  <button type="button" id="complete-button" class="button button5" onclick="send_completed()">Send completed Statement with duration</button>
+  <BR>
+  <button type="button" id="complete-button" class="button button5" onclick="send_completed_but_failed()">Send verb completed but success false (score:20)</button>
+  <BR>
+  <button type="button" id="complete-button" class="button button5" onclick="send_completed_and_passed()">Send completed and success true (score:80)</button>
+  <BR>
+  <button type="button" id="failed-button" class="button button2" onclick="send_failed(20,true)">Send failed&completed Statement (score:20)</button>
+  <BR>
+  <button type="button" id="failed-button" class="button button2" onclick="send_failed(20,false)">Send failed&incomplete Statement (score:20)</button>
+  <BR>
+  <button type="button" id="passed-button" class="button button1" onclick="send_passed(50,true)">Send passed&completed Statement (score:50)</button>
+  <BR>
+  <button type="button" id="passed-button" class="button button1" onclick="send_passed(50,false)">Send passed&incomplete Statement (score:50)</button>
+  <BR>
+  <button type="button" id="passed-button" class="button button1" onclick="send_passed(60, true)">Send passed&completed Statement (score:60)</button>
+  <BR>
+  <button type="button" id="passed-button" class="button button1" onclick="send_passed(70, true)">Send passed&completed Statement (score:70)</button>
+  <BR>
+  <button type="button" id="passed-button" class="button button1" onclick="send_passed(80, true)">Send passed&completed Statement (score:80)</button>
+  <BR>
+  <button type="button" id="terminated-button" class="button button3" onclick="send_terminated()">Send terminated Statement</button>
+   <BR>
+  <button type="button" id="sendstate-button" class="button button4" onclick="send_state()">Send state</button>
+  <BR>
+  <button type="button" id="getstate-button" class="button button4" onclick="get_state()">Get state</button>
+ </body>
+</html>
