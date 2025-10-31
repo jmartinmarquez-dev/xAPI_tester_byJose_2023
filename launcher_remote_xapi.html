@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Launcher xAPI → remote_xapi</title>
+  <style>
+    :root{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    body{margin:0;padding:24px;background:#0b1020;color:#e7eaf3}
+    .card{max-width:860px;margin:auto;background:#141a33;border:1px solid #223;border-radius:14px;padding:18px}
+    h1{margin:6px 0 12px;font-size:22px}
+    .muted{color:#9aa3c7}
+    code{background:#0e1430;border:1px solid #2a3358;border-radius:8px;padding:2px 6px}
+    a.button{display:inline-block;margin-top:12px;padding:10px 14px;border-radius:10px;background:#4a67ff;color:#fff;text-decoration:none}
+    pre{background:#0e1430;color:#e7eaf3;border:1px solid #2a3358;padding:12px;border-radius:10px;overflow:auto}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Launcher xAPI</h1>
+    <p class="muted">Esta página recoge parámetros de la URL y los reenvía a <code>https://jmartinmarquez-dev.github.io/xAPI_tester_byJose_2023/index.html</code>.</p>
+    <p class="muted">Si no hay redirección automática en 15 segundos, usa el botón.</p>
+    <a id="btn" class="button" href="#">Abrir destino</a>
+    <h3>Parámetros detectados</h3>
+    <pre id="paramsOut"></pre>
+    <h3>URL de destino</h3>
+    <pre id="destOut"></pre>
+  </div>
+
+  <script>
+    // Parámetros esperados (passthrough)
+    const PASS_KEYS = [
+      'endpoint', 'actor', 'activity_id', 'auth', 'registration', 'parent_id', 'languagePreference'
+    ];
+
+    function getParams() {
+      const url = new URL(window.location.href);
+      const src = url.searchParams;
+      const out = {};
+      for (const k of PASS_KEYS) {
+        if (src.has(k)) {
+          const v = src.get(k);
+          if (v !== null && v !== '') out[k] = v;
+        }
+      }
+      return out;
+    }
+
+    function buildDestUrl(base, params) {
+      const u = new URL(base);
+      // Importante: actor suele ser JSON → no tocar, sólo encodeURIComponent
+      for (const [k, v] of Object.entries(params)) {
+        u.searchParams.set(k, v);
+      }
+      return u.toString();
+    }
+
+    function pretty(obj){
+      try { return JSON.stringify(obj, null, 2); } catch { return String(obj); }
+    }
+
+    (function main(){
+      const params = getParams();
+      // Mostrar lo recibido
+      document.getElementById('paramsOut').textContent = pretty(params);
+
+      // Construir destino
+      const DEST = 'https://jmartinmarquez-dev.github.io/xAPI_tester_byJose_2023/index.html';
+      const destUrl = buildDestUrl(DEST, params);
+      document.getElementById('destOut').textContent = destUrl;
+
+      // Botón y redirección
+      const btn = document.getElementById('btn');
+      btn.href = destUrl;
+      setTimeout(()=>{ window.location.replace(destUrl); }, 15000);
+    })();
+  </script>
+</body>
+</html>
